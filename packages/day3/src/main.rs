@@ -33,7 +33,6 @@ fn main() {
             intersection2
                 .iter()
                 .filter_map(|item| positions.get(item))
-                .copied()
                 .sum()
         })
         .sum();
