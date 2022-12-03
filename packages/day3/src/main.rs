@@ -10,15 +10,16 @@ fn main() {
     }
 
     let path = format!("{}/input", env!("CARGO_MANIFEST_DIR"));
+    let input = read::file(&path);
 
-    let total: usize = read::file(&path)
+    let total: usize = input
         .lines()
         .map(|ruck_sack| ruck_sack.split_at(ruck_sack.len() / 2))
         .map(|(left, right)| left.chars().find(|v| right.chars().contains(v)).unwrap())
         .filter_map(|a| positions.get(&a))
         .sum();
 
-    let total2: usize = read::file(&path)
+    let total2: usize = input
         .lines()
         .tuples::<(_, _, _)>()
         .map(|(one, two, three)| -> usize {
