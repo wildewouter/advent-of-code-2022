@@ -2,7 +2,14 @@ use array_tool::vec::Intersect;
 
 fn main() {
     let path = format!("{}/input", env!("CARGO_MANIFEST_DIR"));
-    let ans: Vec<Vec<Vec<usize>>> = read::file(&path)
+    let input = read::file(&path);
+
+    println!("Day Four:");
+    println!("Part One: {}", part_one(&input));
+}
+
+fn part_one(input: &str) -> usize {
+    let duplicate_ranges: Vec<Vec<Vec<usize>>> = input
         .lines()
         .map(|pair| -> Vec<Vec<usize>> {
             pair.split(',')
@@ -21,6 +28,5 @@ fn main() {
         })
         .collect();
 
-    println!("Day Four:");
-    println!("Part One: {}", ans.len());
+    duplicate_ranges.len()
 }
