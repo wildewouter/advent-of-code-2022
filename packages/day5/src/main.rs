@@ -73,11 +73,9 @@ fn move_to_row_in_dock(
 ) {
     let mut origin_row = dock.get(origin).unwrap().clone();
     let mut destination_row = dock.get(destination).unwrap().clone();
-    // origin_row.reverse();
 
     let characters: Vec<char> = origin_row.drain(0..*move_amount).collect();
 
-    // origin_row.reverse();
     dock.insert(*origin, origin_row);
 
     destination_row.reverse();
