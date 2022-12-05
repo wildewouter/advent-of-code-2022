@@ -26,6 +26,12 @@ fn main() {
     let mut dock = build_initial_dock(crates, &row_positions);
     let moves = build_move_list(moves);
 
+    println!("Day Five");
+    println!("Part One: {}", part_one(&mut dock.clone(), &moves));
+    println!("Part Two: {}", part_two(&mut dock, &moves));
+}
+
+fn part_one(mut dock: &mut HashMap<char, Vec<char>>, moves: &Vec<(usize, char, char)>) -> String {
     for (amount, origin, destination) in moves {
         move_to_row_in_dock(&amount, &mut dock, &origin, &destination)
     }
@@ -35,9 +41,20 @@ fn main() {
     for key in dock.keys().sorted() {
         ans.push(*dock.get(key).unwrap().first().unwrap());
     }
+    ans
+}
 
-    println!("Day Five");
-    println!("Part One: {}", ans);
+fn part_two(mut dock: &mut HashMap<char, Vec<char>>, moves: &Vec<(usize, char, char)>) -> String {
+    for (amount, origin, destination) in moves {
+        move_multiple_to_row_in_dock(&amount, &mut dock, &origin, &destination)
+    }
+
+    let mut ans: String = String::new();
+
+    for key in dock.keys().sorted() {
+        ans.push(*dock.get(key).unwrap().first().unwrap());
+    }
+    ans
 }
 
 fn build_initial_dock(
@@ -75,6 +92,28 @@ fn move_to_row_in_dock(
     let mut destination_row = dock.get(destination).unwrap().clone();
 
     let characters: Vec<char> = origin_row.drain(0..*move_amount).collect();
+
+    dock.insert(*origin, origin_row);
+
+    destination_row.reverse();
+    for char in characters {
+        destination_row.push(char);
+    }
+    destination_row.reverse();
+    dock.insert(*destination, destination_row);
+}
+
+fn move_multiple_to_row_in_dock(
+    move_amount: &usize,
+    dock: &mut HashMap<char, Vec<char>>,
+    origin: &char,
+    destination: &char,
+) {
+    let mut origin_row = dock.get(origin).unwrap().clone();
+    let mut destination_row = dock.get(destination).unwrap().clone();
+
+    let mut characters: Vec<char> = origin_row.drain(0..*move_amount).collect();
+    characters.reverse();
 
     dock.insert(*origin, origin_row);
 
