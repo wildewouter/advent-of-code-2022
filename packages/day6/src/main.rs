@@ -3,19 +3,20 @@ fn main() {
     let input: String = read::file(&path);
 
     println!("Day Six");
-    println!("Part One: {}", part_one(&input));
+    println!("Part One: {}", find_answer(&input, 4));
+    println!("Part Two: {}", find_answer(&input, 14));
 }
 
-fn part_one(input: &str) -> usize {
+fn find_answer(input: &str, amount: usize) -> usize {
     let chars: Vec<(usize, char)> = input.chars().enumerate().collect();
 
     let mut index: usize = 0;
 
-    for compare in chars.windows(4) {
+    for compare in chars.windows(amount) {
         let mut c: Vec<&char> = compare.iter().map(|(_, v)| v).collect();
         c.sort();
         c.dedup();
-        if c.len() == 4 {
+        if c.len() == amount {
             let (i, _) = compare.last().unwrap();
 
             index = i + 1;
