@@ -3,25 +3,25 @@ fn main() {
     let input: String = read::file(&path);
 
     println!("Day Six");
-    println!("Part One: {}", find_answer(&input, 4));
-    println!("Part Two: {}", find_answer(&input, 14));
+    println!("Part One: {}", find_answer(&input, 4).unwrap());
+    println!("Part Two: {}", find_answer(&input, 14).unwrap());
 }
 
-fn find_answer(input: &str, amount: usize) -> usize {
-    let chars: Vec<(usize, char)> = input.chars().enumerate().collect();
-
-    let mut index: usize = 0;
-
-    for compare in chars.windows(amount) {
+fn find_answer(input: &str, amount: usize) -> Option<usize> {
+    for compare in input
+        .chars()
+        .enumerate()
+        .collect::<Vec<(usize, char)>>()
+        .windows(amount)
+    {
         let mut c: Vec<&char> = compare.iter().map(|(_, v)| v).collect();
         c.sort();
         c.dedup();
         if c.len() == amount {
             let (i, _) = compare.last().unwrap();
 
-            index = i + 1;
-            break;
+            return Some(i + 1);
         }
     }
-    index
+    None
 }
