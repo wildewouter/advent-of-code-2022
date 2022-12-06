@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 fn main() {
     let path = format!("{}/input", env!("CARGO_MANIFEST_DIR"));
     let input: String = read::file(&path);
@@ -14,10 +16,13 @@ fn find_answer(input: &str, amount: usize) -> Option<usize> {
         .collect::<Vec<(usize, char)>>()
         .windows(amount)
     {
-        let mut c: Vec<&char> = compare.iter().map(|(_, v)| v).collect();
-        c.sort();
-        c.dedup();
-        if c.len() == amount {
+        if compare
+            .iter()
+            .map(|(_, v)| v)
+            .collect::<HashSet<&char>>()
+            .len()
+            == amount
+        {
             let (i, _) = compare.last().unwrap();
 
             return Some(i + 1);
