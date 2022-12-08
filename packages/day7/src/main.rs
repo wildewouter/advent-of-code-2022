@@ -1,51 +1,37 @@
 use regex::Regex;
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::HashMap;
 
 fn main() {
-    let path = format!("{}/input", env!("CARGO_MANIFEST_DIR"));
-    let input = read::file(&path);
+    let read_path = format!("{}/input", env!("CARGO_MANIFEST_DIR"));
+    let input = read::file(&read_path);
 
-    let mut folder_size: HashMap<String, usize> = HashMap::new();
-    let mut all_directories: BTreeMap<String, HashSet<String>> = BTreeMap::new();
+    let mut folder_size: HashMap<Vec<String>, usize> = HashMap::new();
 
-    let directory_match = Regex::new(r"cd (?P<directory>(\w|/))").unwrap();
+    let move_into_dir_match = Regex::new(r"cd (?P<directory>(\w|/)+)").unwrap();
     let file_size_match = Regex::new(r"(?P<file_size>\d+) \w(\.\w+)?").unwrap();
     let upwards_dir_match = Regex::new(r"cd \.\.").unwrap();
-    let sub_dir_match = Regex::new(r"dir (?P<directory>\w)").unwrap();
 
-    let mut current_dir: String = "/".to_string();
-    let mut previous_dir: String = String::new();
+    let mut path: Vec<String> = Vec::new();
 
-    let lines = input.split('$').collect::<Vec<&str>>();
-
-    for command_and_output in lines {
+    for command_and_output in input.split('$').collect::<Vec<&str>>() {
         if command_and_output.is_empty() {
             continue;
         }
 
-        let default: HashSet<String> = HashSet::new();
-        all_directories.insert(
-            current_dir.clone(),
-            match all_directories.get(&current_dir) {
-                Some(val) => val.clone(),
-                None => default.clone(),
-            },
-        );
-
         let text: Vec<&str> = command_and_output.lines().collect();
-        let dir = match directory_match.captures(text[0]) {
+
+        let move_into_dir_command = match move_into_dir_match.captures(text[0]) {
             Some(captures) => Ok(captures["directory"].parse::<String>().unwrap()),
             None => Err(()),
         };
 
-        if let Ok(cur_dir) = dir {
-            previous_dir = current_dir;
-            current_dir = cur_dir;
+        if let Ok(new_dir) = move_into_dir_command {
+            path.push(new_dir);
             continue;
         }
 
         if upwards_dir_match.captures(text[0]).is_some() {
-            current_dir = previous_dir.clone();
+            path.pop();
             continue;
         };
 
@@ -60,64 +46,28 @@ fn main() {
             if let Ok(size) = file_size {
                 total_size += size
             }
-
-            let sub_dir = match sub_dir_match.captures(line) {
-                Some(captures) => Ok(captures["directory"].parse::<String>().unwrap()),
-                None => Err(()),
-            };
-
-            if let Ok(dir) = sub_dir {
-                let mut dirs = match all_directories.get(&current_dir) {
-                    Some(dirs) => dirs.clone(),
-                    None => default.clone(),
-                };
-
-                dirs.insert(dir);
-
-                all_directories.insert(current_dir.clone(), dirs);
-            }
         }
 
-        folder_size.insert(current_dir.clone(), total_size);
+        folder_size.insert(path.clone(), total_size);
     }
 
-    let mut answer: HashMap<String, usize> = HashMap::new();
-
-    for current in all_directories.keys() {
-        answer.insert(
-            current.clone(),
-            drill(current, &all_directories, &folder_size),
-        );
-    }
+    let ans = folder_size
+        .iter()
+        .map(|(k, _)| {
+            let key = k.join("/");
+            (
+                key.clone(),
+                folder_size
+                    .iter()
+                    .filter(|(i, _)| i.join("/").starts_with(&key))
+                    .map(|(_, size)| size)
+                    .sum::<usize>(),
+            )
+        })
+        .filter(|(_, size)| *size <= 100000_usize)
+        .map(|(_, v)| v)
+        .sum::<usize>();
 
     println!("Day S7v7n: /// WHATS IN THE BOX");
-    println!(
-        "Part One: {}",
-        answer
-            .iter()
-            .filter(|(_, &size)| size <= 100000_usize)
-            .map(|(_, &size)| size)
-            .sum::<usize>()
-    );
-}
-
-fn drill(
-    sub_dir: &str,
-    all_directories: &BTreeMap<String, HashSet<String>>,
-    folder_size: &HashMap<String, usize>,
-    tail_size: usize,
-) -> usize {
-    let sub_dirs = &all_directories.get(sub_dir).unwrap();
-
-    let size = *folder_size.get(sub_dir).unwrap();
-
-    if sub_dirs.is_empty() {
-        return tail_size + size;
-    }
-
-    // sub_dirs.nex
-
-    // for sub_dir in subs.iter() {
-    //     drill(sub_dir, all_directories, folder_size, tail_size);
-    // }
+    println!("Part One: {}", ans);
 }
