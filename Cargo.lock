@@ -68,6 +68,7 @@ dependencies = [
 name = "day7"
 version = "0.1.0"
 dependencies = [
+ "itertools",
  "read",
  "regex",
 ]
