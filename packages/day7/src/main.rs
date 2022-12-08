@@ -54,18 +54,13 @@ fn main() {
     let ans = folder_size
         .iter()
         .map(|(k, _)| {
-            let key = k.join("/");
-            (
-                key.clone(),
-                folder_size
-                    .iter()
-                    .filter(|(i, _)| i.join("/").starts_with(&key))
-                    .map(|(_, size)| size)
-                    .sum::<usize>(),
-            )
+            folder_size
+                .iter()
+                .filter(|(i, _)| i.join("/").starts_with(&k.join("/")))
+                .map(|(_, size)| size)
+                .sum::<usize>()
         })
-        .filter(|(_, size)| *size <= 100000_usize)
-        .map(|(_, v)| v)
+        .filter(|size| *size <= 100000_usize)
         .sum::<usize>();
 
     println!("Day S7v7n: /// WHATS IN THE BOX");
