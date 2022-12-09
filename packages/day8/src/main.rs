@@ -4,14 +4,15 @@ fn main() {
     let path = format!("{}/input", env!("CARGO_MANIFEST_DIR"));
 
     let mut grid: HashMap<(i32, i32), i32> = HashMap::new();
-    for (x, line) in read::file(&path).lines().enumerate() {
-        for (y, value) in line.split("").filter(|char| !char.is_empty()).enumerate() {
+    for (y, line) in read::file(&path).lines().enumerate() {
+        for (x, value) in line.split("").filter(|char| !char.is_empty()).enumerate() {
             grid.insert((x as i32, y as i32), value.parse::<i32>().unwrap());
         }
     }
 
     println!("Day nine");
     println!("Part one: {}", part_one(&grid));
+    println!("Part two: {}", part_two(&grid));
 }
 
 fn part_one(grid: &HashMap<(i32, i32), i32>) -> usize {
@@ -38,6 +39,30 @@ fn part_one(grid: &HashMap<(i32, i32), i32>) -> usize {
     number_of_trees_visible
 }
 
+fn part_two(grid: &HashMap<(i32, i32), i32>) -> i32 {
+    let mut scenic_scores: Vec<Vec<i32>> = Vec::new();
+
+    for (position, value) in grid.iter() {
+        let check_x_to_right = |(x, y): &(i32, i32)| (*x + 1, *y);
+        let check_x_to_left = |(x, y): &(i32, i32)| (*x - 1, *y);
+        let check_y_to_right = |(x, y): &(i32, i32)| (*x, *y + 1);
+        let check_y_to_left = |(x, y): &(i32, i32)| (*x, *y - 1);
+
+        scenic_scores.push(vec![
+            get_number_of_trees(check_x_to_right, position, grid, value),
+            get_number_of_trees(check_x_to_left, position, grid, value),
+            get_number_of_trees(check_y_to_right, position, grid, value),
+            get_number_of_trees(check_y_to_left, position, grid, value),
+        ]);
+    }
+
+    scenic_scores
+        .iter()
+        .map(|scores| scores.iter().product())
+        .max()
+        .unwrap()
+}
+
 fn is_visible(
     get_next_position: impl Fn(&(i32, i32)) -> (i32, i32),
     (x, y): &(i32, i32),
@@ -49,10 +74,9 @@ fn is_visible(
         return true;
     }
 
-    let mut next_height = grid.get(&get_next_position(&(*x, *y)));
+    let mut current_position = get_next_position(&(*x, *y));
+    let mut next_height = grid.get(&current_position);
     let mut is_visible = true;
-
-    let mut current_position = (*x, *y);
 
     while next_height.is_some() && is_visible {
         let current_height = next_height.unwrap();
@@ -63,4 +87,29 @@ fn is_visible(
     }
 
     is_visible
+}
+
+fn get_number_of_trees(
+    get_next_position: impl Fn(&(i32, i32)) -> (i32, i32),
+    (x, y): &(i32, i32),
+    grid: &HashMap<(i32, i32), i32>,
+    check_height: &i32,
+) -> i32 {
+    let mut current_position = get_next_position(&(*x, *y));
+
+    let mut next_height = grid.get(&current_position);
+    let mut amount = 0;
+
+    while next_height.is_some() {
+        amount += 1;
+
+        if next_height.unwrap() >= check_height {
+            return amount;
+        }
+
+        current_position = get_next_position(&current_position);
+        next_height = grid.get(&current_position);
+    }
+
+    amount
 }
