@@ -16,7 +16,7 @@ fn main() {
 
             for _ in 0..amount {
                 let new_positions =
-                    calculate_new_positions(&(new_head_position, tail_position), direction, &1);
+                    calculate_new_positions(&(new_head_position, tail_position), direction);
 
                 new_head_position = new_positions.0;
                 tail_position = new_positions.1;
@@ -39,13 +39,12 @@ fn main() {
 fn calculate_new_positions(
     position: &((i32, i32), (i32, i32)),
     direction: &str,
-    steps: &i32,
 ) -> ((i32, i32), (i32, i32)) {
     let new_position = match direction {
-        "R" => move_right(position, steps),
-        "L" => move_left(position, steps),
-        "U" => move_up(position, steps),
-        "D" => move_down(position, steps),
+        "R" => move_right(position),
+        "L" => move_left(position),
+        "U" => move_up(position),
+        "D" => move_down(position),
         _ => *position,
     };
 
@@ -58,78 +57,50 @@ fn calculate_new_positions(
 
 fn move_right(
     ((x_head, y_head), (x_tail, y_tail)): &((i32, i32), (i32, i32)),
-    amount: &i32,
 ) -> ((i32, i32), (i32, i32)) {
-    match amount {
-        0 => ((*x_head, *y_head), (*x_tail, *y_tail)),
-        1 => {
-            if ((y_head - 1 == *y_tail || y_head + 1 == *y_tail) && x_head == x_tail)
-                || leave_tail_in_place(&((*x_head, *y_head), (*x_tail, *y_tail)), "R")
-            {
-                return ((x_head + amount, *y_head), (*x_tail, *y_tail));
-            }
-
-            ((x_head + amount, *y_head), (x_head + amount - 1, *y_head))
-        }
-        _ => ((x_head + amount, *y_head), (x_head + amount - 1, *y_head)),
+    if ((y_head - 1 == *y_tail || y_head + 1 == *y_tail) && x_head == x_tail)
+        || leave_tail_in_place(&((*x_head, *y_head), (*x_tail, *y_tail)), "R")
+    {
+        return ((x_head + 1, *y_head), (*x_tail, *y_tail));
     }
+
+    ((x_head + 1, *y_head), (*x_head, *y_head))
 }
 
 fn move_left(
     ((x_head, y_head), (x_tail, y_tail)): &((i32, i32), (i32, i32)),
-    amount: &i32,
 ) -> ((i32, i32), (i32, i32)) {
-    match amount {
-        0 => ((*x_head, *y_head), (*x_tail, *y_tail)),
-        1 => {
-            if ((y_head - 1 == *y_tail || y_head + 1 == *y_tail) && x_head == x_tail)
-                || leave_tail_in_place(&((*x_head, *y_head), (*x_tail, *y_tail)), "L")
-            {
-                return ((x_head - amount, *y_head), (*x_tail, *y_tail));
-            }
-
-            ((x_head - amount, *y_head), (x_head - amount + 1, *y_head))
-        }
-        _ => ((x_head - amount, *y_head), (x_head - amount + 1, *y_head)),
+    if ((y_head - 1 == *y_tail || y_head + 1 == *y_tail) && x_head == x_tail)
+        || leave_tail_in_place(&((*x_head, *y_head), (*x_tail, *y_tail)), "L")
+    {
+        return ((x_head - 1, *y_head), (*x_tail, *y_tail));
     }
+
+    ((x_head - 1, *y_head), (*x_head, *y_head))
 }
 
 fn move_down(
     ((x_head, y_head), (x_tail, y_tail)): &((i32, i32), (i32, i32)),
-    amount: &i32,
 ) -> ((i32, i32), (i32, i32)) {
-    match amount {
-        0 => ((*x_head, *y_head), (*x_tail, *y_tail)),
-        1 => {
-            if ((x_head - 1 == *x_tail || x_head + 1 == *x_tail) && y_head == y_tail)
-                || leave_tail_in_place(&((*x_head, *y_head), (*x_tail, *y_tail)), "D")
-            {
-                return ((*x_head, y_head - 1), (*x_tail, *y_tail));
-            }
-
-            ((*x_head, y_head - amount), (*x_head, y_head - amount + 1))
-        }
-        _ => ((*x_head, y_head - amount), (*x_head, y_head - amount + 1)),
+    if ((x_head - 1 == *x_tail || x_head + 1 == *x_tail) && y_head == y_tail)
+        || leave_tail_in_place(&((*x_head, *y_head), (*x_tail, *y_tail)), "D")
+    {
+        return ((*x_head, y_head - 1), (*x_tail, *y_tail));
     }
+
+    ((*x_head, y_head - 1), (*x_head, *y_head))
 }
 
 fn move_up(
     ((x_head, y_head), (x_tail, y_tail)): &((i32, i32), (i32, i32)),
-    amount: &i32,
 ) -> ((i32, i32), (i32, i32)) {
-    match amount {
-        0 => ((*x_head, *y_head), (*x_tail, *y_tail)),
-        1 => {
-            if ((x_head - 1 == *x_tail || x_head + 1 == *x_tail) && y_head == y_tail)
-                || leave_tail_in_place(&((*x_head, *y_head), (*x_tail, *y_tail)), "U")
-            {
-                return ((*x_head, y_head + 1), (*x_tail, *y_tail));
-            }
-
-            ((*x_head, y_head + amount), (*x_head, y_head + amount - 1))
-        }
-        _ => ((*x_head, y_head + amount), (*x_head, y_head + amount - 1)),
+    if ((x_head - 1 == *x_tail || x_head + 1 == *x_tail) && y_head == y_tail)
+        || leave_tail_in_place(&((*x_head, *y_head), (*x_tail, *y_tail)), "U")
+    {
+        return ((*x_head, y_head + 1), (*x_tail, *y_tail));
     }
+
+    ((*x_head, y_head + 1), (*x_head, *y_head))
 }
 
 fn leave_tail_in_place(
