@@ -10,7 +10,7 @@ fn main() {
         }
     }
 
-    println!("Day nine");
+    println!("Day eight");
     println!("Part one: {}", part_one(&grid));
     println!("Part two: {}", part_two(&grid));
 }
